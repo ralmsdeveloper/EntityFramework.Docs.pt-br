@@ -13,7 +13,7 @@ ms.locfileid: "46283765"
 ---
 # <a name="upgrading-applications-from-previous-versions-to-ef-core-20"></a>Atualizando aplicativos de versões anteriores para o EF Core 2.0
 
-Podemos ter aproveitado a oportunidade para refinar significativamente nossas APIs existentes e os comportamentos no 2.0. Há algumas melhorias que podem exigir a modificação do código de aplicativo existente, embora Nós acreditamos que, para a maioria dos aplicativos o impacto será baixo, na maioria dos casos que exigem apenas recompilação e alterações mínimas de guiado para substituir as APIs obsoletas.
+Podemos ter aproveitado a oportunidade para refinar significativamente nossas APIs existentes e os comportamentos no 2.0. Há algumas melhorias que podem exigir a modificação do código em seu aplicativo existente, embora nós acreditamos que, para a maioria dos aplicativos o impacto será baixo, na maioria dos casos que exigem apenas recompilação e mínimas alterações guiadas para substituir as APIs obsoletas.
 
 Atualizando um aplicativo existente para o EF Core 2.0 pode exigir:
 
@@ -31,7 +31,7 @@ Aplicativos que têm como destino o ASP.NET Core 2.0 podem usar o EF Core 2.0 se
 
 ## <a name="new-way-of-getting-application-services-in-aspnet-core"></a>Nova maneira de obter serviços de aplicativo no ASP.NET Core
 
-O padrão recomendado para aplicativos web ASP.NET Core foi atualizado para 2.0, de forma que interrompeu a lógica de tempo de design que do EF Core é usado em 1. x. Anteriormente no tempo de design, o EF Core seria tentar invocar `Startup.ConfigureServices` diretamente para acessar o provedor de serviços do aplicativo. No ASP.NET Core 2.0, a configuração é inicializada fora do `Startup` classe. Aplicativos que usam o EF Core normalmente acessam sua cadeia de caracteres de conexão da configuração, portanto, `Startup` por si só não é mais suficiente. Se você atualizar um aplicativo do ASP.NET Core 1.x, você pode receber o seguinte erro ao usar as ferramentas do EF Core.
+O padrão recomendado para aplicativos web ASP.NET Core foi atualizado para 2.0, de forma que interrompeu a lógica de tempo de design que do EF Core é usado em 1. x. Anteriormente no tempo de design, o EF Core era capaz de invocar `Startup.ConfigureServices` diretamente para acessar o provedor de serviços do aplicativo. No ASP.NET Core 2.0, a configuração é inicializada fora do `Startup` classe. Aplicativos que usam o EF Core normalmente acessam sua string de conexão de `Configuration`, portanto, `Startup` por si só não é mais suficiente. Se você atualizar um aplicativo do ASP.NET Core 1.x, você pode receber o seguinte erro ao usar as ferramentas do EF Core.
 
 > Nenhum construtor sem parâmetros foi encontrado em 'ApplicationContext'. Adicione um construtor sem parâmetros para 'ApplicationContext' ou adicione uma implementação de ' IDesignTimeDbContextFactory&lt;ApplicationContext&gt;' no mesmo assembly como 'ApplicationContext'
 
@@ -58,13 +58,13 @@ namespace AspNetCoreDotNetCore2._0App
 }
 ```
 
-A adoção desse novo padrão na atualização de aplicativos para o 2.0 é altamente recomendável e é necessária para recursos de produto como as migrações do Entity Framework Core para trabalhar. A outra alternativa comum é para [implementar *IDesignTimeDbContextFactory\<TContext >*](xref:core/miscellaneous/cli/dbcontext-creation#from-a-design-time-factory).
+A adoção desse novo padrão na atualização de aplicativos para o 2.0 é altamente recomendável e é necessária para recursos de produto como as migrações do Entity Framework Core para trabalhar. A outra alternativa comum é [implementar *IDesignTimeDbContextFactory\<TContext >*](xref:core/miscellaneous/cli/dbcontext-creation#from-a-design-time-factory).
 
 ## <a name="idbcontextfactory-renamed"></a>IDbContextFactory renomeado
 
-Para dar suporte a padrões de aplicativo diversas e fornecer aos usuários mais controle sobre como suas `DbContext` é usado em tempo de design, nós fornecemos, no passado, o `IDbContextFactory<TContext>` interface. Em tempo de design, as ferramentas do EF Core descobrirá as implementações dessa interface em seu projeto e usá-lo para criar `DbContext` objetos.
+Para dar suporte a padrões de aplicativo diversos e fornecer aos usuários mais controle sobre como suas `DbContext` é usado em tempo de design, nós fornecemos, no passado, a interface `IDbContextFactory<TContext>`. Em tempo de design, as ferramentas do EF Core descobrirá as implementações dessa interface em seu projeto e usará para criar objetos `DbContext`.
 
-Essa interface tinha um nome muito geral que alguns usuários para tentar novamente, usá-la para outros de enganar `DbContext`-criação de cenários. Elas eram surpreendidas quando as ferramentas do EF, em seguida, tentou usar sua implementação no tempo de design e causou comandos como `Update-Database` ou `dotnet ef database update` falhe.
+Essa interface tinha um nome muito geral que enganava alguns usuários para tentar reutilizá-lo para outros cenários de criação de `DbContext`. Elas eram surpreendidas quando as ferramentas do EF, em seguida, tentou usar sua implementação no tempo de design e causou comandos como `Update-Database` ou `dotnet ef database update` falhe.
 
 Para comunicar-se a semântica de tempo de design de alta segurança dessa interface, foi renomeado para `IDesignTimeDbContextFactory<TContext>`.
 
@@ -86,7 +86,7 @@ As alterações do ASP.NET Core 2.0 também exigiram que o diretório de trabalh
 
 ## <a name="ef-core-20-requires-a-20-database-provider"></a>EF Core 2.0 requer um provedor de banco de 2.0 dados
 
-Para o EF Core 2.0, fizemos muitas simplificações e melhorias nos provedores de banco de dados de maneira funcione. Isso significa que os provedores de 1.0 e 1.1 não funcionará com o EF Core 2.0.
+Para o EF Core 2.0, fizemos muitas simplificações e melhorias na maneira como os provedores de banco de dados funcionam. Isso significa que os provedores 1.0.xe 1.1.x não funcionarão com o EF Core 2.0.
 
 Os provedores SQL Server e SQLite são fornecidos pela equipe do EF e as 2.0 versões estarão disponíveis como parte do 2.0 de versão. Os provedores de terceiros do código-fonte aberto para [SQL Compact](https://github.com/ErikEJ/EntityFramework.SqlServerCompact), [PostgreSQL](https://github.com/npgsql/Npgsql.EntityFrameworkCore.PostgreSQL), e [MySQL](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql) estão sendo atualizadas para 2.0. Todos os outros provedores, entre em contato com o gravador de provedor.
 
@@ -135,7 +135,7 @@ Chamando `AddEntityFramework`, `AddEntityFrameworkSqlServer`, etc. não é neces
 
 ## <a name="in-memory-databases-must-be-named"></a>Bancos de dados na memória devem ser nomeados
 
-Global banco de dados na memória sem nome foi removido e, em vez disso, todos os bancos de dados na memória devem ser nomeados. Por exemplo:
+O banco de dados na memória global sem nome foi removido e, em vez disso, todos os bancos de dados na memória devem ser nomeados. Por exemplo:
 
 ``` csharp
 optionsBuilder.UseInMemoryDatabase("MyDatabase");
